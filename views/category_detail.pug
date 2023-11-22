@@ -1,0 +1,18 @@
+extends layout
+
+block content
+
+  h1 Category: #{category.name}
+
+  div(style='margin-left:20px;margin-top:20px')
+
+    h4 Sources
+
+    dl
+      each source in category_sources
+        dt
+          a(href=source.url) #{source.name}
+        dd #{source.description}
+
+      else
+        p This category has no sources.

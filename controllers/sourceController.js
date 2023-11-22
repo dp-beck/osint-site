@@ -1,13 +1,36 @@
 const Source = require("../models/source");
+const Jurisdiction = require("../models/jurisdiction");
+const Category = require("../models/category");
+
 const asyncHandler = require("express-async-handler");
 
 exports.index = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Site Home Page");
+  const [
+    numSources,
+    numJurisdictions,
+    numCategories
+  ] = await Promise.all([
+    Source.countDocuments({}).exec(),
+    Jurisdiction.countDocuments({}).exec(),
+    Category.countDocuments({}).exec(),
+  ]);
+
+  res.render("index", {
+    title: "OSINT Site Home",
+    source_count: numSources,
+    jurisdiction_count: numJurisdictions,
+    category_count: numCategories,
+  });
 });
 
 // Display list of all sources.
 exports.source_list = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: source list");
+  const allSources = await Source.find({}, "name jurisdiction")
+    .sort({ name: 1 })
+    .populate("jurisdiction")
+    .exec();
+  
+    res.render("source_list", { title: "Source List", source_list: allSources});
 });
 
 // Display detail page for a specific source.

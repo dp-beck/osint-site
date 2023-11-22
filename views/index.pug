@@ -2,4 +2,14 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
+  p 
+    | Welcome to #[em OSINT Site], an online resource for information 
+    | on publicly accessible databases that will be useful for open source
+    | investigations.
+  
+  h1 Dynamic Content 
+
+  ul 
+    li #[strong Sources:] !{source_count} 
+    li #[strong Jurisdictions:] !{jurisdiction_count} 
+    li #[strong Categories:] !{category_count}

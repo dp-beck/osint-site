@@ -1,0 +1,12 @@
+extends layout 
+
+block content 
+    h1= title 
+
+    ul 
+        each source in source_list 
+            li    
+                a(href=source.url) #{source.name} 
+                | (#{source.jurisdiction.name}) 
+        else 
+            li There are no sources.

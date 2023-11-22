@@ -3,7 +3,12 @@ const asyncHandler = require("express-async-handler");
 
 // Display list of all Jurisdictions
 exports.jurisdiction_list = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Jurisdictions List");
+    // Display list of all Jurisdictions.
+  const allJurisdictions = await Jurisdiction.find().sort({ name: 1 }).exec();
+  res.render("jurisdiction_list", {
+    title: "Jurisdiction List",
+    jurisdiction_list: allJurisdictions,
+  });
 });
 
 // Display detail page for a specific Jurisdiction.
