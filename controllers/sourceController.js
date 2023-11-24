@@ -35,7 +35,22 @@ exports.source_list = asyncHandler(async (req, res, next) => {
 
 // Display detail page for a specific source.
 exports.source_detail = asyncHandler(async (req, res, next) => {
-  res.send(`NOT IMPLEMENTED: source detail: ${req.params.id}`);
+  const source = await Source.findById(req.params.id)
+    .populate("jurisdiction")
+    .populate("category")
+    .exec();
+  
+  if (source === null) {
+    const err = new Error("Source not found.");
+    err.status = 404;
+    return next(err);
+  }
+
+  res.render("source_detail", {
+    title: source.name,
+    source: source,  
+  });
+
 });
 
 // Display source create form on GET.

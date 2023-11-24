@@ -1,4 +1,5 @@
 const Jurisdiction = require("../models/jurisdiction");
+const Source = require("../models/source");
 const asyncHandler = require("express-async-handler");
 
 // Display list of all Jurisdictions
@@ -13,7 +14,22 @@ exports.jurisdiction_list = asyncHandler(async (req, res, next) => {
 
 // Display detail page for a specific Jurisdiction.
 exports.jurisdiction_detail = asyncHandler(async (req, res, next) => {
-    res.send(`NOT IMPLEMENTED: Jurisdiction detail: ${req.params.id}`);
+    const [jurisdiction, allSourcesInJurisdiction] = await Promise.all([
+      Jurisdiction.findById(req.params.id).exec(),
+      Source.find({ jurisdiction: req.params.id }, "name description").exec(),
+    ]);
+
+    if (jurisdiction === null) {
+      const err = new Error("Jurisdiction not found");
+      err.status = 404;
+      return next(err);
+    }
+
+    res.render("jurisdiction_detail", {
+      title: "Jurisdiction Detail",
+      jurisdiction: jurisdiction,
+      jurisdiction_sources: allSourcesInJurisdiction
+    });
 });
 
 // Display jurisdiction create form on GET.

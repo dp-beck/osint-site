@@ -1,0 +1,18 @@
+extends layout
+
+block content  
+
+    h1 #{jurisdiction.name} 
+    
+    div(style='margin-left:20px;margin-top:20px') 
+
+        h4 Sources 
+
+        dl 
+            each source in jurisdiction_sources 
+                dt 
+                    a(href=source.url) #{source.name} 
+                dd #{source.description} 
+                 
+            else 
+                p This jurisdiction has no sources.
