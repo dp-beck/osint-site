@@ -5,11 +5,18 @@ const router = express.Router();
 const jurisdiction_controller = require("../controllers/jurisdictionController");
 const source_controller = require("../controllers/sourceController");
 const category_controller = require("../controllers/categoryController");
+const user_controller = require("../controllers/userController.js");
 
 /// SOURCE ROUTES ///
 
 /* GET home page. */
 router.get('/', source_controller.index);
+
+// GET request for creating a new user
+router.get("/sign-up", user_controller.user_create_get);
+
+// POST request for creating a new user
+router.post("/sign-up", user_controller.user_create_post);
 
 // GET request for creating a source. NOTE This must come before routes that display source (uses id).
 router.get("/source/create", source_controller.source_create_get);
