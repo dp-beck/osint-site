@@ -3,15 +3,26 @@ extends layout
 block content
   h1= title
   p 
-    | Welcome to #[em OSINT Site], an online resource for information 
-    | on publicly accessible databases that will be useful for open source
+    | Welcome to the #[em Open-Source Compendium], an online resource for information 
+    | on publicly accessible databases that will be useful for open-source
     | investigations.
   
-  h1 Dynamic Content 
-
   ul 
-    li #[strong Sources:] !{source_count} 
-    li #[strong Jurisdictions:] !{jurisdiction_count} 
-    li #[strong Categories:] !{category_count}
- 
-  a(href="/sign-up") Sign Up
+    li #[strong Sources in Compendium:] !{source_count} 
+    li #[strong Jurisdictions with Sources:] !{jurisdiction_count} 
+    li #[strong Types of Sources:] !{category_count}
+
+  if user
+    if user.creatorPrivilege
+      p(style='text-align: center') Welcome Back !{user.firstName}. Why not add some more sources to help your fellow investigators!
+    else
+      p(style='text-align: center') Welcome Back !{user.firstName}. Request creator privileges from fake@email.com to begin adding new sources and jurisdictions!
+  else 
+    p(style='text-align: center') Log in or Sign up to see and create user comments! 
+
+//-  if user.creatorPrivilege 
+    
+  else if user.creatorPrivilege === false
+    p(style='text-align: center') Welcome Back !{user.firstName}. Request creator privileges from fake@email.com to begin adding new sources and jurisdictions!
+  else 
+    p(style='text-align: center') Log in or Sign up to see and create user comments! 

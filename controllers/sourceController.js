@@ -4,6 +4,7 @@ const Category = require("../models/category");
 
 const asyncHandler = require("express-async-handler");
 
+// Controller for Home Page
 exports.index = asyncHandler(async (req, res, next) => {
   const [
     numSources,
@@ -16,10 +17,11 @@ exports.index = asyncHandler(async (req, res, next) => {
   ]);
 
   res.render("index", {
-    title: "OSINT Site Home",
+    title: "Open-Source Compendium",
     source_count: numSources,
     jurisdiction_count: numJurisdictions,
     category_count: numCategories,
+    user: req.user,
   });
 });
 
