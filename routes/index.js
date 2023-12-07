@@ -1,9 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const User = require("../models/user");
-const bcryptjs = require("bcryptjs");
 
 // Require controller modules.
 const jurisdiction_controller = require("../controllers/jurisdictionController");
@@ -11,41 +7,10 @@ const source_controller = require("../controllers/sourceController");
 const category_controller = require("../controllers/categoryController");
 const user_controller = require("../controllers/userController.js");
 
-passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        const user = await User.findOne({ username: username });
-        if (!user) {
-          return done(null, false, { message: "Incorrect username "})
-        };
-        const match = await bcryptjs.compare(password, user.password);
-        if (!match) {
-          return done(null, false, { message: "Incorrect password" });
-        };
-        return done(null, user);
-      } catch(err) {
-        return done(err);
-      };
-    })
-  );
-  
-  passport.serializeUser((user, done) => {
-    done(null, user.id);
-  });
-  
-  passport.deserializeUser(async (id, done) => {
-    try {
-      const user = await User.findById(id);
-      done(null, user);
-    } catch(err) {
-      done(err);
-    };
-  });
-  
-/// SOURCE ROUTES ///
-
 /* GET home page. */
 router.get('/', source_controller.index);
+
+/// SIGN UP / LOG IN / LOG OUT ROUTES ///
 
 // GET request for creating a new user
 router.get("/sign-up", user_controller.user_create_get);
@@ -57,23 +22,12 @@ router.post("/sign-up", user_controller.user_create_post);
 router.get("/log-in", user_controller.user_log_in_get);
 
 // POST request for logging in a user
-router.post(
-    "/log-in",
-    passport.authenticate("local", {
-        successRedirect: "/",
-        failureRedirect: "/log-in"
-    })
-);
+router.post("/log-in", user_controller.user_log_in_post);
 
 // GET request for logging out a user 
-router.get("/log-out", (req, res, next) => {
-    req.logout((err) => {
-        if(err) {
-            return next(err);
-        }
-        res.redirect("/");
-    });
-});
+router.get("/log-out", user_controller.user_log_out_get);
+
+/// SOURCE ROUTES ///
 
 // GET request for creating a source. NOTE This must come before routes that display source (uses id).
 router.get("/source/create", source_controller.source_create_get);

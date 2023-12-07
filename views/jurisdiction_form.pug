@@ -1,0 +1,23 @@
+extends layout 
+
+block content 
+    h1 #{title}
+
+    if user
+        if user.creatorPrivilege
+
+            form(method='POST' action='') 
+                div.form-group  
+                    label(for='name') Jurisdiction: 
+                    input#name.form-control(type='text', placeholder="New York, China, Ontario, etc." name='name' required='true' value=(underfined===jurisdiction ? '' : jurisdiction.name) ) 
+                button.btn.btn-primary(type='submit') Submit 
+        
+            if errors 
+                ul 
+                    for error in errors 
+                        li!= error.msg 
+    
+        else 
+            p You do not have privileges to create new jurisdictions.
+    else 
+        p Log in to access this page.

@@ -2,6 +2,7 @@ const Source = require("../models/source");
 const Jurisdiction = require("../models/jurisdiction");
 const Category = require("../models/category");
 
+const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
 // Controller for Home Page
@@ -32,7 +33,7 @@ exports.source_list = asyncHandler(async (req, res, next) => {
     .populate("jurisdiction")
     .exec();
   
-    res.render("source_list", { title: "Source List", source_list: allSources});
+    res.render("source_list", { title: "Source List", source_list: allSources, user: req.user});
 });
 
 // Display detail page for a specific source.
@@ -51,19 +52,88 @@ exports.source_detail = asyncHandler(async (req, res, next) => {
   res.render("source_detail", {
     title: source.name,
     source: source,  
+    user: req.user
   });
 
 });
 
 // Display source create form on GET.
 exports.source_create_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: source create GET");
+  const [allJurisdictions, allCategories ] = await Promise.all([
+    Jurisdiction.find().sort( {name: 1}).exec(),
+    Category.find().sort({ name: 1 }).exec()
+  ]);
+  res.render("source_form", {
+    title: "Create Source",
+    jurisdictions: allJurisdictions,
+    categories: allCategories,
+    user: req.user,
+  });
 });
 
 // Handle source create on POST.
-exports.source_create_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: source create POST");
-});
+exports.source_create_post = [
+  (req, res, next) => {
+    if (!Array.isArray(req.body.category)) {
+      req.body.category =
+        typeof req.body.category === "undefined" ? [] : [req.body.category];
+    }
+    next();
+  },
+
+  body("name", "Name must not be empty")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("jurisdiction", "Jurisdiction must not be empty.")
+    .trim()
+    .isLength({ min:1 })
+    .escape(),
+  body("description", "Description must not be empty")
+    .trim()
+    .isLength({ min:1 })
+    .escape(),
+  body("externalUrl", "External URL must not be empty.")
+    .trim()
+    .isLength({ min:1 }),
+  body("category.*").escape(),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const source = new Source({
+      name: req.body.name,
+      jurisdiction: req.body.jurisdiction,
+      description: req.body.description,
+      externalUrl: req.body.externalUrl,
+      category: req.body.category
+    });
+
+    if (!errors.isEmpty()) {
+      const [allJurisdictions, allCategories ] = await Promise.all([
+        Jurisdiction.find().sort( {name: 1}).exec(),
+        Category.find().sort({ name: 1 }).exec()
+      ]);
+
+      for (const category of allCategories) {
+        if (source.category.includes(category._id)) {
+          category.checked = "true";
+        }
+      }
+      res.render("source_form", {
+        title: "Create Source",
+        jurisdictions: allJurisdictions,
+        categories: allCategories,
+        source: source,
+        errors: errors.array(),
+        user: req.user,
+      });
+    } else {
+      await source.save();
+      res.redirect(source.url);
+    }
+  }),
+];
 
 // Display source delete form on GET.
 exports.source_delete_get = asyncHandler(async (req, res, next) => {

@@ -2,6 +2,7 @@ const Category = require("../models/category");
 const Source = require("../models/source");
 
 const asyncHandler = require("express-async-handler");
+const { body, validationResult } = require("express-validator");
 
 // Display list of all category.
 exports.category_list = asyncHandler(async (req, res, next) => {
@@ -9,6 +10,7 @@ exports.category_list = asyncHandler(async (req, res, next) => {
   res.render("category_list", {
     title: "Category List",
     category_list: allCategories,
+    user: req.user,
   });
 });
 
@@ -27,18 +29,46 @@ exports.category_detail = asyncHandler(async (req, res, next) => {
     title: "Category Detail",
     category: category,
     category_sources: sourcesInCategory,
+    user: req.user
   });
 });
 
 // Display category create form on GET.
-exports.category_create_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: category create GET");
-});
+exports.category_create_get = (req, res, next) => {
+  res.render("category_form", { title: "Create Category", user: req.user });
+};
 
 // Handle category create on POST.
-exports.category_create_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: category create POST");
-});
+exports.category_create_post = [
+  body("name", "Category name must contain at least 3 characters")
+    .trim()
+    .isLength({ min: 3 })
+    .escape(),
+  
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const category = new Category({ name: req.body.name });
+
+    if(!errors.isEmpty()) {
+      res.render("category_form", {
+        title: "Create Category",
+        category: category,
+        user: req.user,
+        errors: errors.array()
+      });
+      return;
+    } else {
+      const categoryExists = await Category.findOne({ name: req.body.name }).exec();
+      if (categoryExists) {
+        res.redirect(categoryExists.url);
+      } else {
+        await category.save();
+        res.redirect(category.url);
+      }
+    }
+  }),
+];
 
 // Display category delete form on GET.
 exports.category_delete_get = asyncHandler(async (req, res, next) => {

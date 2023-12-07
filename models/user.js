@@ -7,7 +7,7 @@ const UserSchema = new Schema({
     password: {type: String, required: true },
     firstName: {type: String, required: true},
     lastName: {type: String},
-    creatorPrivilege: {type:Boolean, required: true}
+    creatorPrivilege: {type: Boolean, required: true}
 });
 
 // Virtual Prop for the Internal URL

@@ -12,8 +12,6 @@ block content
       input#password.form-control(type="password", placeholder="Password" name="password" required="true" value=(undefined===user ? '' : user.password) ) 
 
     button.btn.btn-primary(type="submit") Log In
-  
-  if errors 
-    ul 
-      for error in errors 
-        li!=error.msg 
+    
+  if messages 
+    p Last Login Attempt Error: #{messages[messages.length - 1]}

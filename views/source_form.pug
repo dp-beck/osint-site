@@ -1,0 +1,44 @@
+extends layout 
+
+block content 
+    h1= title 
+
+    if user 
+        if user.creatorPrivilege
+
+            form(method='POST' action='')
+                div.form-group
+                    label(for='name') Name:
+                    input#name.form-control(type='text', placeholder='Name of source' name='name' required='true' value=(undefined===source ? '' : source.name) )
+                div.form-group
+                    label(for='jurisdiction') Jurisdiction:
+                    select#jurisdiction.form-control(type='select', placeholder='Select jurisdiction' name='jurisdiction' required='true' )
+                        for jurisdiction in jurisdictions
+                            if source
+                                option(value=jurisdiction._id selected=(jurisdiction._id.toString()===source.jurisdiction._id.toString() ? 'selected' : false) ) #{jurisdiction.name}
+                            else
+                                option(value=jurisdiction._id) #{jurisdiction.name}
+                div.form-group
+                    label(for='description') Description:
+                    textarea#description.form-control(type='textarea', placeholder='Description of source' name='description' required='true') #{undefined===source ? '' : source.description}
+                div.form-group
+                    label(for='externalUrl') URL:
+                    input#externalUrl.form-control(type='text', placeholder='URL' name='externalUrl' value=(undefined===source ? '' : source.externalUrl) required='true')
+                div.form-group
+                    label Category:
+                    div
+                        for category in categories
+                            div(style='display: inline; padding-right:10px;')
+                                input.checkbox-input(type='checkbox', name='category', id=category._id, value=category._id, checked=category.checked )
+                                label(for=category._id) #{category.name}
+                button.btn.btn-primary(type='submit') Submit
+
+            if errors
+                ul
+                    for error in errors
+                        li!= error.msg
+
+        else 
+            p You do not have privileges to create new jurisdictions.
+    else 
+        p Log in to access this page.
