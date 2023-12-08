@@ -137,12 +137,24 @@ exports.source_create_post = [
 
 // Display source delete form on GET.
 exports.source_delete_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: source delete GET");
+  const source = await Source.findById(req.params.id).exec();
+
+  if (source === null) {
+    res.redirect("/sources");
+  };
+
+  res.render("source_delete", {
+    title: "Delete Source",
+    source: source,
+    user: req.user
+  });
 });
 
 // Handle source delete on POST.
 exports.source_delete_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: source delete POST");
+  const source = await Source.findById(req.params.id).exec();
+  await Source.findByIdAndDelete(req.body.sourceid);
+  res.redirect("/sources");
 });
 
 // Display source update form on GET.

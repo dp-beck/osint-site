@@ -1,0 +1,33 @@
+extends layout 
+
+block content 
+    h1 #{title}
+
+    h2 #{category.name}
+
+    if user
+        if user.creatorPrivilege
+            if category_sources.length 
+                p #[strong Delete the following sources before attempting to delete this category.] 
+
+                div(style='margin-left:20px;margin-top:20px')
+                    h4 Sources 
+
+                    dl
+                        each source in category_sources 
+                            dt 
+                                a(href=source.url) #{source.name} 
+                            dd #{source.description}
+
+            else 
+                p Do you really want to delete this category?
+
+                form(method='POST' action='') 
+                    div.form-group  
+                        input#categoryid.form-control(type='hidden', name='categoryid', required='true', value=category._id)
+                    button.btn.btn-primary(type='submit') Delete 
+
+        else 
+            p You do not have privileges to delete categories.
+    else 
+        p Log in to access this page.

@@ -72,12 +72,42 @@ exports.category_create_post = [
 
 // Display category delete form on GET.
 exports.category_delete_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: category delete GET");
+  const [category, sourcesInCategory] = await Promise.all([
+    Category.findById(req.params.id).exec(),
+    Source.find({ category: req.params.id }, "name description"),
+  ]);
+
+  if (category === null) {
+    res.redirect('/categories');
+  }
+
+  res.render("category_delete", {
+    title: "Delete Category",
+    category: category,
+    category_sources: sourcesInCategory,
+    user: req.user,
+  });
 });
 
 // Handle category delete on POST.
 exports.category_delete_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: category delete POST");
+  const [category, sourcesInCategory] = await Promise.all([
+    Category.findById(req.params.id).exec(),
+    Source.find({ category: req.params.id }, "name description"),
+  ]);
+
+  if (sourcesInCategory.length > 0) {
+    res.render("category_delete", {
+      title: "Delete Category",
+      category: category,
+      category_sources: sourcesInCategory,
+      user: req.user,
+    });
+    return;
+  } else {
+    await Category.findByIdAndDelete(req.body.categoryid);
+    res.redirect('/categories');
+  }
 });
 
 // Display category update form on GET.

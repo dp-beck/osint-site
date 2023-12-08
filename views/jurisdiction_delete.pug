@@ -1,0 +1,43 @@
+extends layout 
+
+block content 
+    h1 #{title}
+
+    if user
+        if user.creatorPrivilege
+            if jurisdiction_sources.length || subjurisdictions.length
+                if jurisdiction_sources.length 
+                    p #[strong Delete the following sources before attempting to delete this jurisdiction.] 
+
+                    div(style='margin-left:20px;margin-top:20px')
+                        h4 Sources 
+
+                        dl
+                            each source in jurisdiction_sources 
+                                dt 
+                                    a(href=source.url) #{source.name} 
+                                dd #{source.description}
+
+                if subjurisdictions.length 
+                    p #[strong Delete the following subjurisdictions before attempting to delete this jurisdiction.] 
+
+                    div(style='margin-left:20px;margin-top:20px')
+                        h4 Subjurisdictions 
+
+                        ul
+                            each subjurisdiction in subjurisdictions 
+                                li
+                                    a(href=subjurisdiction.url) #{subjurisdiction.name} 
+            
+            else 
+                p Do you really want to delete this jurisdiction?
+
+                form(method='POST' action='') 
+                    div.form-group  
+                        input#jurisdictionid.form-control(type='hidden', name='jurisdictionid', required='true', value=jurisdiction._id)
+                    button.btn.btn-primary(type='submit') Delete 
+
+        else 
+            p You do not have privileges to delete jurisdictions.
+    else 
+        p Log in to access this page.

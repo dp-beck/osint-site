@@ -99,12 +99,47 @@ exports.jurisdiction_create_post = [
 
 // Display jurisdiction delete form on GET.
 exports.jurisdiction_delete_get = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: jurisdiction delete GET");
+    const [jurisdiction, allSourcesInJurisdiction] = await Promise.all([
+      Jurisdiction.findById(req.params.id)
+        .populate("subjurisdictions")
+        .exec(),
+      Source.find({ jurisdiction: req.params.id }, "name description").exec()
+    ]);
+
+    if (jurisdiction === null) {
+      res.redirect("/jurisdictions");
+    };
+
+    res.render("jurisdiction_delete", {
+      title: "Delete Jurisdiction",
+      jurisdiction: jurisdiction,
+      subjurisdictions: jurisdiction.subjurisdictions,
+      jurisdiction_sources: allSourcesInJurisdiction,
+      user: req.user
+    });
   });
   
   // Handle jurisdiction delete on POST.
   exports.jurisdiction_delete_post = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: jurisdiction delete POST");
+    const [jurisdiction, allSourcesInJurisdiction] = await Promise.all([
+      Jurisdiction.findById(req.params.id)
+        .populate("subjurisdictions")
+        .exec(),
+      Source.find({ jurisdiction: req.params.id }, "name description").exec()
+    ]);
+
+    if (allSourcesInJurisdiction.length > 0 || jurisdiction.subjurisdictions.length > 0) {
+      res.render("jurisdiction_delete", {
+        title: "Delete Jurisdiction",
+        jurisdiction: jurisdiction,
+        subjurisdictions: jurisdiction.subjurisdictions,
+        jurisdiction_sources: allSourcesInJurisdiction,
+        user: req.user
+      });
+    } else {
+      await Jurisdiction.findByIdAndDelete(req.body.jurisdictionid);
+      res.redirect("/jurisdictions");
+    }
   });
   
   // Display jurisdiction update form on GET.
