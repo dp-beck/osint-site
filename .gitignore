@@ -32,3 +32,6 @@ npm-debug.log
 .DS_Store
 
 .env
+
+# personal notes file
+notes.md

@@ -16,3 +16,16 @@ block content
                  
             else 
                 p This jurisdiction has no sources.
+
+    div(style='margin-left:20px;margin-top:20px') 
+
+        h4 Sub-Jurisdictions 
+
+        dl 
+            each subjurisdiction in subjurisdictions
+                dt 
+                    a(href=subjurisdiction.url) #{subjurisdiction.name}
+                 
+            else 
+                p This jurisdiction has no sub-jurisdictions.
+
