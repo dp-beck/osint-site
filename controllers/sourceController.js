@@ -105,6 +105,7 @@ exports.source_create_post = [
       name: req.body.name,
       jurisdiction: req.body.jurisdiction,
       description: req.body.description,
+      comments: req.body.comments,
       externalUrl: req.body.externalUrl,
       category: req.body.category
     });
@@ -159,10 +160,100 @@ exports.source_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display source update form on GET.
 exports.source_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: source update GET");
+  const [source, allJurisdictions, allCategories] = await Promise.all([
+    Source.findById(req.params.id)
+      .populate("jurisdiction")
+      .populate("category")
+      .exec(),
+    Jurisdiction.find().sort({ name: 1}).exec(),
+    Category.find().sort({ name: 1}).exec(),
+  ]) 
+   
+  if (source === null) {
+    const err = new Error("Source not found");
+    err.status = 404;
+    return next(err);
+  };
+
+  for (const category of allCategories) {
+    for (const source_c of source.category) {
+      if (category._id.toString() === source_c._id.toString()) {
+        category.checked = "true";
+      }
+    }
+  }
+
+  res.render("source_form", {
+    title: "Update Source",
+    jurisdictions: allJurisdictions,
+    categories: allCategories,
+    source: source,
+    user: req.user,
+  });
 });
 
 // Handle source update on POST.
-exports.source_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: source update POST");
-});
+exports.source_update_post = [
+  (req, res, next) => {
+    if (!Array.isArray(req.body.category)) {
+      req.body.category = typeof req.body.category === "undefined" ? [] : [req.body.category];
+    }
+    next();
+  },
+
+  body("name", "Name must not be empty")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("jurisdiction", "Jurisdiction must not be empty.")
+    .trim()
+    .isLength({ min:1 })
+    .escape(),
+  body("description", "Description must not be empty")
+    .trim()
+    .isLength({ min:1 })
+    .escape(),
+  body("externalUrl", "External URL must not be empty.")
+    .trim()
+    .isLength({ min:1 }),
+  body("category.*").escape(),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const source = new Source({
+      name: req.body.name,
+      jurisdiction: req.body.jurisdiction,
+      description: req.body.description,
+      comments: req.body.comments,
+      externalUrl: req.body.externalUrl,
+      category: typeof req.body.category === "undefined" ? [] : req.body.category,
+      _id: req.params.id 
+    });
+
+    if (!errors.isEmpty()) {
+      const [allJurisdictions, allCategories] = await Promise.all([
+        Jurisdiction.find().sort({ name: 1}).exec(),
+        Category.find().sort({ name: 1}).exec(),
+      ]); 
+       
+      for (const category of allCategories) {
+        if (source.category.indexOf(category._id) > -1) {
+          category.checked = "true";
+        }
+      }
+      res.render("source_form", {
+        title: "Update Source",
+        jurisdictions: allJurisdictions,
+        categories: allCategories,
+        source: source,
+        errors: errors.array(),
+        user: req.user,
+      });
+      return;
+    } else {
+      const updatedSource = await Source.findByIdAndUpdate(req.params.id, source, {});
+      res.redirect(updatedSource.url);
+    }
+  }),
+];
