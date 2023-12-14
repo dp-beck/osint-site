@@ -32,7 +32,7 @@ html(lang='en')
                 a(href='/source/create') Create new source
               li 
                 hr
-              if user
+              if (user && !signupErrors)
                 li
                   a(href="/log-out") Log Out
                 li

@@ -41,7 +41,7 @@ passport.deserializeUser(async (id, done) => {
 
 // Display user create form on GET.
 exports.user_create_get = (req, res, next) => {
-    res.render("sign-up", { title: "Sign Up"});
+    res.render("sign-up", { title: "Sign Up" });
   };
 
 // Handle user create on POST
@@ -52,11 +52,22 @@ exports.user_create_post = [
     .isLength({ min: 5 })
     .escape(),
 
+  body("username").custom(async value => {
+    const user = await User.findOne( {username: value });
+    if (user) {
+      throw new Error("Username already in use")
+    }
+  }),
+
   body("password")
     .trim()
     .isLength({ min: 8 })
     .escape()
     .withMessage("Password must be 8 characters."),
+  
+  body("confirmPassword")
+    .custom((value, { req }) => {return value === req.body.password;})
+    .withMessage("Passwords do not match"),
   
   asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
@@ -74,20 +85,13 @@ exports.user_create_post = [
         res.render('sign-up', {
           title: "Sign Up",
           user: user,
-          errors: errors.array(),
+          signupErrors: errors.array(),
         });
         return;
       } else {
-        const userExists = await User.findOne( {username: req.body.username})
-          .collation({locale: "en", strength: 2 })
-          .exec();
-        if (userExists) {
-          res.redirect(userExists.url);
-        } else {
           await user.save();
-        }
+          res.redirect("/");
       }
-      res.redirect("/");
     });
   })
 ];

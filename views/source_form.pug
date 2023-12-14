@@ -20,10 +20,7 @@ block content
                                 option(value=jurisdiction._id) #{jurisdiction.name}
                 div.form-group
                     label(for='description') Description:
-                    textarea#description.form-control(type='textarea', placeholder='Description of source' name='description' required='true') #{undefined===source ? '' : source.description}
-                div.form-group
-                    label(for='comments') Comments:
-                    textarea#comments.form-control(type='textarea', placeholder='Helpful comments on how to use source' name='comments' required='true') #{undefined===source ? '' : source.comments}                
+                    textarea#description.form-control(type='textarea', placeholder='Description of source' name='description' required='true') #{undefined===source ? '' : source.description}  
                 div.form-group
                     label(for='externalUrl') URL:
                     input#externalUrl.form-control(type='text', placeholder='URL' name='externalUrl' value=(undefined===source ? '' : source.externalUrl) required='true')

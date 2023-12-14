@@ -6,7 +6,17 @@ block content
     p #[strong Jurisdiction:] 
         a(href=source.jurisdiction.url) #{source.jurisdiction.name} 
     p #[strong Description:] #{source.description} 
-    p #[strong Comments:] #{source.comments}
+    p #[strong User Comments:]
+        if user
+            ul 
+                for comment in source.comments 
+                    li 
+                        p #{comment.text} 
+                        p #{comment.author.username} (#{comment.createdAt.toDateString()})
+            p 
+                a(href=source.url+"/comment") Add a user comment
+        else 
+            p You need to sign in to see and add user comments.
     p #[strong Categories:] 
         each val, index in source.category
             a(href=val.url) #{val.name} 

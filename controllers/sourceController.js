@@ -1,6 +1,7 @@
 const Source = require("../models/source");
 const Jurisdiction = require("../models/jurisdiction");
 const Category = require("../models/category");
+const Comment = require("../models/comment");
 
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
@@ -41,6 +42,9 @@ exports.source_detail = asyncHandler(async (req, res, next) => {
   const source = await Source.findById(req.params.id)
     .populate("jurisdiction")
     .populate("category")
+    .populate({
+      path: "comments",
+      populate: {path: 'author' }})
     .exec();
   
   if (source === null) {
@@ -254,6 +258,70 @@ exports.source_update_post = [
     } else {
       const updatedSource = await Source.findByIdAndUpdate(req.params.id, source, {});
       res.redirect(updatedSource.url);
+    }
+  }),
+];
+
+// Display source comment form on GET.
+exports.source_comment_get = asyncHandler(async (req, res, next) => {
+  const source = await Source.findById(req.params.id)
+      .populate("jurisdiction")
+      .populate("category")
+      .exec();
+   
+  if (source === null) {
+    const err = new Error("Source not found");
+    err.status = 404;
+    return next(err);
+  };
+
+  console.log(req.user);
+
+  res.render("comment_form", {
+    title: "Comment on Source",
+    source: source,
+    user: req.user,
+  });
+});
+
+// Handle source comment on POST.
+// NOT COMPLETED YET : NEED TO UPDATE SOURCE UPDATE PROCESS
+exports.source_comment_post = [
+
+  body("text", "Comment must not be empty")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    
+    const source = await Source.findById(req.params.id)
+      .populate("jurisdiction")
+      .populate("category")
+      .exec();
+
+    console.log(req.user);
+
+    const comment = new Comment({
+      text: req.body.text,
+      author: req.user._id,
+    });
+
+    if (!errors.isEmpty()) {
+      res.render("comment_form", {
+        title: "Comment on Source",
+        source: source,
+        comment: comment,
+        errors: errors.array(),
+        user: req.user,
+      });
+      return;
+    } else {
+      source.comments.push(comment._id);
+      await comment.save();
+      await source.save();
+      res.redirect(source.url);
     }
   }),
 ];

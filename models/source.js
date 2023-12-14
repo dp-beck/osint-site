@@ -7,7 +7,7 @@ const SourceSchema = new Schema({
     jurisdiction: { type: Schema.Types.ObjectId, ref: "Jurisdiction", required: true },
     category: [{ type: Schema.Types.ObjectId, ref: "Category", required: true }],
     description: { type: String, required: true },
-    comments:  { type: String },
+    comments:  [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     externalUrl: { type: String, required: true },
 });
 

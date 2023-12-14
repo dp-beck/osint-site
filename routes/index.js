@@ -47,6 +47,12 @@ router.get("/source/:id/update", source_controller.source_update_get);
 // POST request to update source.
 router.post("/source/:id/update", source_controller.source_update_post);
 
+// GET request to create comment on a source.
+router.get("/source/:id/comment", source_controller.source_comment_get);
+
+// POST request to creat comment on a source.
+router.post("/source/:id/comment", source_controller.source_comment_post);
+
 // GET request for one source.
 router.get("/source/:id", source_controller.source_detail);
 
