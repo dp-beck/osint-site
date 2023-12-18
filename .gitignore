@@ -35,3 +35,8 @@ npm-debug.log
 
 # personal notes file
 notes.md
+
+# files created in launching app on Fly IO
+.dockerignore
+Dockerfile
+fly.toml
