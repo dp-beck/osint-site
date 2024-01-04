@@ -5,6 +5,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const passport = require('passport');
 
 const indexRouter = require('./routes/index');
@@ -33,7 +34,16 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware for Use Auth
-app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true }));
+
+// Using Mongo Connect for my Session Store for Production Environment
+app.use(session({ 
+  secret: process.env.SESSION_SECRET, 
+  resave: false, 
+  saveUninitialized: true,
+  store: MongoStore.create({
+    mongoUrl: mongoDB,
+  }),
+ }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use((req, res, next) => {
